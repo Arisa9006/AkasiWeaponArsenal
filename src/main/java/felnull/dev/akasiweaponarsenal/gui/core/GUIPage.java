@@ -50,13 +50,14 @@ public abstract class GUIPage implements InventoryHolder {
         HandlerList.unregisterAll(listener);
     }
 
-    public void onWindowBorderRightClick(InventoryClickEvent e){}
-
-    public void onWindowBorderLeftClick(InventoryClickEvent e){}
-
     public void onOutsideWindowRightClick(InventoryClickEvent e){}
 
     public void onOutsideWindowLeftClick(InventoryClickEvent e){}
 
     public void onOutsideWindowClick(InventoryClickEvent e){}
+
+    @Override
+    public Inventory getInventory() {
+        return this.inventory;
+    }
 }

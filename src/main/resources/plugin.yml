@@ -6,6 +6,8 @@ commands:
     permission: akasiweaponarsenal.command.admin
   awareload:
     permission: akasiweaponarsenal.command.admin
+  awapagelist:
+    permission: akasiweaponarsenal.command.admin
 permissions:
   akasiweaponarsenal.command.admin:
     default: op

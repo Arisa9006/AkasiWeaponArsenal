@@ -9,6 +9,7 @@ public class AWAReload implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         PageDataIO.load();
+        sender.sendMessage("提督! リロードが完了いたしました!");
         return true;
     }
 }

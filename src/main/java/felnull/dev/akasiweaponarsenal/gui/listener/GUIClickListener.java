@@ -18,7 +18,7 @@ public class GUIClickListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent e){
-        if(e.getView().getTopInventory() != page.inventory) return;
+        if(!e.getView().getTopInventory().equals(page.getInventory())) return;
         GUIItem item = page.getItem(e.getSlot());
         if(item != null){
             switch (e.getClick()){
@@ -60,12 +60,6 @@ public class GUIClickListener implements Listener {
         }
 
         switch (e.getClick()){
-            case WINDOW_BORDER_RIGHT:
-                page.onWindowBorderRightClick(e);
-                break;
-            case WINDOW_BORDER_LEFT:
-                page.onWindowBorderLeftClick(e);
-                break;
             case RIGHT:
                 if(e.getSlot() == -999){
                     page.onOutsideWindowClick(e);
@@ -79,7 +73,6 @@ public class GUIClickListener implements Listener {
                 }
                 break;
         }
-
         e.setCancelled(true);
     }
 

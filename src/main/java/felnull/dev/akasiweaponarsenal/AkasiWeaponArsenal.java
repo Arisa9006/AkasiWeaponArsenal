@@ -2,6 +2,7 @@ package felnull.dev.akasiweaponarsenal;
 
 import felnull.dev.akasiweaponarsenal.commands.AWAReload;
 import felnull.dev.akasiweaponarsenal.commands.OpenArsenalCommand;
+import felnull.dev.akasiweaponarsenal.commands.PageList;
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.dataio.PageDataIO;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
@@ -37,6 +38,7 @@ public final class AkasiWeaponArsenal extends JavaPlugin {
     public void initCommands() {
         Bukkit.getPluginCommand("awaopen").setExecutor(new OpenArsenalCommand());
         Bukkit.getPluginCommand("awareload").setExecutor(new AWAReload());
+        Bukkit.getPluginCommand("awapagelist").setExecutor(new PageList());
     }
     public void initListener() {
     }

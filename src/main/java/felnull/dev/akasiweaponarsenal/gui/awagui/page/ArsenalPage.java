@@ -9,13 +9,13 @@ import org.bukkit.Sound;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
+import java.util.Map;
+
 public class ArsenalPage extends GUIPage {
 
     public PageData pageData;
     public int invStartPosition;
     public InventoryGUI gui;
-    public int page;
-
 
     public ArsenalPage(InventoryGUI gui, PageData pageData) {
         super(gui, pageData.pageName, pageData.getInventorySize());
@@ -31,12 +31,11 @@ public class ArsenalPage extends GUIPage {
 
         for(int slot = 0; slot < pageData.maxLine * 9; slot++) {
             int slotPosition = slot - this.invStartPosition; //インベントリの参照範囲を動かす
-            slotPosition += 9; //1行目は空ける
-            if(slotPosition > 53 || slotPosition < 9){
+            if(slotPosition > 53 || slotPosition < 0){
                 continue;
             }
-            if(pageData.itemSlot.containsKey(slotPosition)) {
-                setItem(slotPosition, new ArsenalItem(gui, pageData.itemSlot.get(slotPosition)));
+            if(pageData.itemSlot.containsKey(slot)) {
+                setItem(slotPosition, new ArsenalItem(gui, pageData.itemSlot.get(slot)));
             }
         }
     }
@@ -48,12 +47,12 @@ public class ArsenalPage extends GUIPage {
 
     @Override
     public Inventory getInventory() {
-        return null;
+        return super.getInventory();
     }
 
     public void changeSlotStartPosition(int startPosition) {
         this.invStartPosition = startPosition;
-        if (this.invStartPosition > (pageData.maxLine - (pageData.maxLine % 6)) * 9){//9スロット*5行*5ページ
+        if (this.invStartPosition > (pageData.maxLine - (pageData.maxLine % 6)) * 9){
             this.invStartPosition = 225;
         } else if (this.invStartPosition < 0) {
             this.invStartPosition = 0;
@@ -63,8 +62,8 @@ public class ArsenalPage extends GUIPage {
 
     public void addSlotStartPosition(int plusPosition) {
         this.invStartPosition += plusPosition;
-        if (this.invStartPosition > (pageData.maxLine - (pageData.maxLine % 6)) * 9){
-            this.invStartPosition = (pageData.maxLine - (pageData.maxLine % 6)) * 9;
+        if (this.invStartPosition > (pageData.maxLine - (pageData.maxLine / 2)) * 9){
+            this.invStartPosition = (pageData.maxLine - (pageData.maxLine / 2)) * 9;
         }
         this.setUp();
     }
@@ -79,11 +78,17 @@ public class ArsenalPage extends GUIPage {
 
     @Override
     public void onOutsideWindowRightClick(InventoryClickEvent e) {
+        if(!pageData.windowClickEnable){
+            return;
+        }
         this.addSlotStartPosition(9);
     }
 
     @Override
     public void onOutsideWindowLeftClick(InventoryClickEvent e) {
+        if(!pageData.windowClickEnable){
+            return;
+        }
         this.subtractSlotStartPosition(9);
     }
 }
