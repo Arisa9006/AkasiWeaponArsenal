@@ -1,0 +1,11 @@
+name: AkasiWeaponArsenal
+version: '1.0-SNAPSHOT'
+main: felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal
+commands:
+  awaopen:
+    permission: akasiweaponarsenal.command.admin
+  awareload:
+    permission: akasiweaponarsenal.command.admin
+permissions:
+  akasiweaponarsenal.command.admin:
+    default: op
