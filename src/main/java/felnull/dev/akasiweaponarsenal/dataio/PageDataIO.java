@@ -3,6 +3,7 @@ package felnull.dev.akasiweaponarsenal.dataio;
 import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -70,21 +71,23 @@ public class PageDataIO {
                             item.setDurability((short) (damage));
                         }
                         List<String> commandList = itemData.getStringList("Commands");
-                        AbstractItem abstractItem = new AbstractItem(item, commandList);
+                        String trueMessage = itemData.getString("TrueMessage", null);
+                        String falseMessage = itemData.getString("FalseMessage", null);
+                        AbstractItem abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
 
                         ConfigurationSection needItemSection = itemData.getConfigurationSection("NeedItem");
-                        if (needItemSection == null) continue;
                         Map<Material, Integer> costMap = new HashMap<>();
-                        for (String needItemName : needItemSection.getKeys(false)){
-                            String matName = needItemName.toUpperCase();
-                            Material mat = Material.getMaterial(matName);
-                            if(mat != null ){
-                                abstractItem.lostItemList.add(mat);
-                                costMap.put(mat, needItemSection.getInt(needItemName + ".Cost", 1));
+                        if (needItemSection != null) {
+                            for (String needItemName : needItemSection.getKeys(false)) {
+                                String matName = needItemName.toUpperCase();
+                                Material mat = Material.getMaterial(matName);
+                                if (mat != null) {
+                                    abstractItem.lostItemList.add(mat);
+                                    costMap.put(mat, needItemSection.getInt(needItemName + ".Cost", 1));
+                                }
                             }
                         }
                         abstractItem.lostItemNumberList = costMap;
-
                         for(Integer slot : itemData.getIntegerList("Slot")) {
                             itemSlot.put(slot, abstractItem);
                         }

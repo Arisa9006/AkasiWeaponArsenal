@@ -16,9 +16,15 @@ public class AbstractItem {
     public List<Material> lostItemList = new ArrayList<>();
     @Getter
     public Map<Material, Integer> lostItemNumberList = new HashMap<>();
+    @Getter
+    public String falseMessage;
+    @Getter
+    public String trueMessage;
 
-    public AbstractItem(ItemStack itemStack, List<String> commandList) {
+    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage) {
         this.itemStack = itemStack;
         this.commandList = commandList;
+        this.trueMessage = trueMessage;
+        this.falseMessage = falseMessage;
     }
 }

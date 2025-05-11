@@ -1,5 +1,6 @@
 package felnull.dev.akasiweaponarsenal.gui.awagui.item;
 
+import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import felnull.dev.akasiweaponarsenal.gui.core.GUIItem;
 import felnull.dev.akasiweaponarsenal.gui.core.InventoryGUI;
@@ -17,10 +18,12 @@ import java.util.Set;
 public class ArsenalItem extends GUIItem {
 
     AbstractItem abstractItem;
+    PageData pageData;
 
-    public ArsenalItem(InventoryGUI gui, AbstractItem abstractItem) {
+    public ArsenalItem(InventoryGUI gui, AbstractItem abstractItem, PageData pageData) {
         super(gui, new ItemStack(abstractItem.itemStack));
         this.abstractItem = abstractItem;
+        this.pageData = pageData;
     }
 
     @Override
@@ -39,12 +42,17 @@ public class ArsenalItem extends GUIItem {
                     removeItems((Player) e.getWhoClicked(), material, abstractItem.lostItemNumberList.get(material));
                 }
             }else {
-                e.getWhoClicked().sendMessage("作成するための素材が足りません...");
+                if(abstractItem.falseMessage != null) {
+                    e.getWhoClicked().sendMessage(abstractItem.falseMessage);
+                }
                 ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_VILLAGER_HURT, 1f,1f);
                 return;
             }
         }
         for(String command : abstractItem.commandList) {
+            if(abstractItem.trueMessage != null) {
+                e.getWhoClicked().sendMessage(abstractItem.trueMessage);
+            }
             String parsedCommand = command.replace("%player%", e.getWhoClicked().getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
         }

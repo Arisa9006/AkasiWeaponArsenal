@@ -22,11 +22,11 @@ public class ArsenalPage extends GUIPage {
         this.pageData = pageData;
         this.invStartPosition = 0;
         this.gui = gui;
+        gui.player.playSound(gui.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
 
     @Override
     public void setUp() {
-        gui.player.playSound(gui.player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);
         super.inventory.clear();
 
         for(int slot = 0; slot < pageData.maxLine * 9; slot++) {
@@ -35,7 +35,7 @@ public class ArsenalPage extends GUIPage {
                 continue;
             }
             if(pageData.itemSlot.containsKey(slot)) {
-                setItem(slotPosition, new ArsenalItem(gui, pageData.itemSlot.get(slot)));
+                setItem(slotPosition, new ArsenalItem(gui, pageData.itemSlot.get(slot), pageData));
             }
         }
     }
