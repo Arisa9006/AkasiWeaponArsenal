@@ -61,7 +61,7 @@ public class PageDataIO {
                         ItemStack item = new ItemStack(material);
 
                         ItemMeta meta = item.getItemMeta();
-                        meta.setDisplayName(itemName);
+                        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemData.getString("Name", itemName)));
                         meta.setLore(coloredLoreList);
                         meta.spigot().setUnbreakable(true);
                         item.setItemMeta(meta);
