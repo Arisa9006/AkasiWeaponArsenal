@@ -73,7 +73,14 @@ public class PageDataIO {
                         List<String> commandList = itemData.getStringList("Commands");
                         String trueMessage = itemData.getString("TrueMessage", null);
                         String falseMessage = itemData.getString("FalseMessage", null);
-                        AbstractItem abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
+                        String action = itemData.getString("Action", null);
+                        AbstractItem abstractItem;
+                        if(action != null){
+
+                        }else {
+                            abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
+                        }
+
 
                         ConfigurationSection needItemSection = itemData.getConfigurationSection("NeedItem");
                         Map<Material, Integer> costMap = new HashMap<>();

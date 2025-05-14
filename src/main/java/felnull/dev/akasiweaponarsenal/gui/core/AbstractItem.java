@@ -20,11 +20,20 @@ public class AbstractItem {
     public String falseMessage;
     @Getter
     public String trueMessage;
+    @Getter
+    public String action;
 
     public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage) {
         this.itemStack = itemStack;
         this.commandList = commandList;
         this.trueMessage = trueMessage;
         this.falseMessage = falseMessage;
+    }
+    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage, String action) {
+        this.itemStack = itemStack;
+        this.commandList = commandList;
+        this.trueMessage = trueMessage;
+        this.falseMessage = falseMessage;
+        this.action = action;
     }
 }
