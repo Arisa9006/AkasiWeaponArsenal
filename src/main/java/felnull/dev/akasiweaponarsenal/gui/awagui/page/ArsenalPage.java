@@ -5,6 +5,7 @@ import felnull.dev.akasiweaponarsenal.gui.awagui.item.ArsenalItem;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import felnull.dev.akasiweaponarsenal.gui.core.GUIPage;
 import felnull.dev.akasiweaponarsenal.gui.core.InventoryGUI;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -18,11 +19,11 @@ public class ArsenalPage extends GUIPage {
     public InventoryGUI gui;
 
     public ArsenalPage(InventoryGUI gui, PageData pageData) {
-        super(gui, pageData.pageName, pageData.getInventorySize());
+        super(gui, ChatColor.translateAlternateColorCodes('&', pageData.pageName), pageData.getInventorySize());
         this.pageData = pageData;
         this.invStartPosition = 0;
         this.gui = gui;
-        gui.player.playSound(gui.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        gui.player.playSound(gui.player.getLocation(), pageData.openSound, 1f, 1f);
     }
 
     @Override
@@ -62,8 +63,8 @@ public class ArsenalPage extends GUIPage {
 
     public void addSlotStartPosition(int plusPosition) {
         this.invStartPosition += plusPosition;
-        if (this.invStartPosition > (pageData.maxLine - (pageData.maxLine / 2)) * 9){
-            this.invStartPosition = (pageData.maxLine - (pageData.maxLine / 2)) * 9;
+        if (this.invStartPosition > ((pageData.maxLine - (pageData.maxLine / 2)) - 3) * 9){
+            this.invStartPosition = ((pageData.maxLine - (pageData.maxLine / 2)) - 3) * 9;
         }
         this.setUp();
     }

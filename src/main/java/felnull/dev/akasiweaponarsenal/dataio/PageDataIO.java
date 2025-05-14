@@ -6,8 +6,10 @@ import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -26,7 +28,6 @@ public class PageDataIO {
         checkFolder(dataFolder);
         //ArsenalPage内のyaml全読み込み
         File[] files = dataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
-        Map<String, PageData> pageDataMap = new HashMap<>();
 
         //配列内のyamlを１つ１つ読み込み
         if (files != null) {
@@ -43,6 +44,7 @@ public class PageDataIO {
                     boolean scrollEnable = pageSection.getBoolean("ScrollEnable", false);
                     boolean windowClickEnable = pageSection.getBoolean("WindowClickEnable", false);
                     int maxLine = pageSection.getInt("MaxLine", 1);
+                    Sound openSound = Sound.valueOf(pageSection.getString("OpenSound", Sound.UI_BUTTON_CLICK.name()));
 
                     //-----    Item     -----
 
@@ -64,15 +66,33 @@ public class PageDataIO {
                         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemData.getString("Name", itemName)));
                         meta.setLore(coloredLoreList);
                         meta.spigot().setUnbreakable(true);
+                        if(itemData.getBoolean("HideNBT", true)){
+                            meta.addItemFlags(
+                                    ItemFlag.HIDE_ATTRIBUTES,     // 攻撃力などを隠す
+                                    ItemFlag.HIDE_UNBREAKABLE,    // Unbreakable を隠す
+                                    ItemFlag.HIDE_ENCHANTS,       // エンチャントを隠す（必要なら）
+                                    ItemFlag.HIDE_DESTROYS,       // "Can Destroy" を隠す
+                                    ItemFlag.HIDE_PLACED_ON,      // "Can Place On" を隠す
+                                    ItemFlag.HIDE_POTION_EFFECTS  // ポーション効果を隠す
+                            );
+                        }
                         item.setItemMeta(meta);
 
                         if(itemData.isInt("Damage")){
-                            short damage = (short) (item.getType().getMaxDurability() - itemData.getInt("Damage"));
+                            short damage = (short) itemData.getInt("Damage");
                             item.setDurability((short) (damage));
                         }
                         List<String> commandList = itemData.getStringList("Commands");
-                        String trueMessage = itemData.getString("TrueMessage", null);
+                        String trueMessage =  itemData.getString("TrueMessage", null);
+                        if(trueMessage != null){
+                            trueMessage = ChatColor.translateAlternateColorCodes('&', trueMessage);
+                        }
                         String falseMessage = itemData.getString("FalseMessage", null);
+                        if(falseMessage != null){
+                            falseMessage = ChatColor.translateAlternateColorCodes('&', falseMessage);
+                        }
+                        AbstractItem abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
+
                         String action = itemData.getString("Action", null);
                         AbstractItem abstractItem;
                         if(action != null){
@@ -80,7 +100,6 @@ public class PageDataIO {
                         }else {
                             abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
                         }
-
 
                         ConfigurationSection needItemSection = itemData.getConfigurationSection("NeedItem");
                         Map<Material, Integer> costMap = new HashMap<>();
@@ -102,7 +121,7 @@ public class PageDataIO {
 
                     //-----------------------
 
-                    PageData pageData = new PageData(pageName, scrollEnable, maxLine, itemSlot, windowClickEnable);
+                    PageData pageData = new PageData(pageName, scrollEnable, maxLine, itemSlot, windowClickEnable, openSound);
                     AkasiWeaponArsenal.getPageDataMap().put(pageName, pageData);
                 }
                 AkasiWeaponArsenal.getINSTANCE().getLogger().info("Loaded config: " + file.getName());
