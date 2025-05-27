@@ -1,16 +1,17 @@
 package felnull.dev.akasiweaponarsenal.gui.awagui.page;
 
+import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
+import felnull.dev.akasiweaponarsenal.data.SoundData;
 import felnull.dev.akasiweaponarsenal.gui.awagui.item.ArsenalItem;
-import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import felnull.dev.akasiweaponarsenal.gui.core.GUIPage;
 import felnull.dev.akasiweaponarsenal.gui.core.InventoryGUI;
+import felnull.dev.akasiweaponarsenal.task.PlaySoundTask;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
-import java.util.Map;
+import java.util.Collections;
 
 public class ArsenalPage extends GUIPage {
 
@@ -23,7 +24,9 @@ public class ArsenalPage extends GUIPage {
         this.pageData = pageData;
         this.invStartPosition = 0;
         this.gui = gui;
-        gui.player.playSound(gui.player.getLocation(), pageData.openSound, 1f, 1f);
+        for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.GUI_OPEN, Collections.emptyList())){
+            new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
+        }
     }
 
     @Override
@@ -44,6 +47,14 @@ public class ArsenalPage extends GUIPage {
     @Override
     public void back() {
 
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.GUI_CLOSE, Collections.emptyList())){
+            new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
+        }
     }
 
     @Override

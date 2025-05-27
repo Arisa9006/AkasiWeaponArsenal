@@ -2,6 +2,8 @@ package felnull.dev.akasiweaponarsenal.dataio;
 
 import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
+import felnull.dev.akasiweaponarsenal.data.SoundData;
+import felnull.dev.akasiweaponarsenal.gui.awagui.page.SoundType;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -91,12 +93,10 @@ public class PageDataIO {
                         if(falseMessage != null){
                             falseMessage = ChatColor.translateAlternateColorCodes('&', falseMessage);
                         }
-                        AbstractItem abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
-
-                        String action = itemData.getString("Action", null);
                         AbstractItem abstractItem;
+                        String action = itemData.getString("Action", null);
                         if(action != null){
-
+                            abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage, action);
                         }else {
                             abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
                         }
@@ -118,10 +118,50 @@ public class PageDataIO {
                             itemSlot.put(slot, abstractItem);
                         }
                     }
+                    //----------- SOUND ------------
 
-                    //-----------------------
+                    ConfigurationSection soundSection = pageSection.getConfigurationSection("Sound");
+                    Map<SoundType, List<SoundData>> soundTypeListMap = new HashMap<>();
+                    if(soundSection != null){
+                        for (String soundTypeName : itemSection.getKeys(false)) {
+                            SoundType soundType;
+                            try {
+                                soundType = SoundType.valueOf(soundTypeName.toUpperCase());
+                            }catch (IllegalArgumentException | NullPointerException e){
+                                Bukkit.getLogger().warning("無効なサウンドType: " + soundTypeName.toUpperCase());
+                                Bukkit.getLogger().info("利用可能なSoundType");
+                                for(SoundType enableSoundType : SoundType.values()){
+                                    Bukkit.getLogger().info(enableSoundType.name());
+                                }
+                                continue;
+                            }
+                            List<SoundData> soundDataList = new ArrayList<>();
 
-                    PageData pageData = new PageData(pageName, scrollEnable, maxLine, itemSlot, windowClickEnable, openSound);
+                            ConfigurationSection soundDataSection = pageSection.getConfigurationSection(soundTypeName);
+                            if(soundDataSection == null){
+                                Bukkit.getLogger().warning("SoundDataを記述してください");
+                                continue;
+                            }
+                            for(String soundName : soundDataSection.getKeys(false)){
+                                Sound sound;
+                                try {
+                                    sound = Sound.valueOf(soundName);
+                                }catch (IllegalArgumentException | NullPointerException e) {
+                                    Bukkit.getLogger().warning("無効なサウンドName: " + soundTypeName.toUpperCase());
+                                    continue;
+                                }
+                                float volume = (float) soundDataSection.getDouble("Volume");
+                                float pitch = (float) soundDataSection.getDouble("Pitch");
+                                int delay = soundDataSection.getInt("Delay");
+
+                                soundDataList.add(new SoundData(sound, volume, pitch, delay));
+                            }
+                            soundTypeListMap.put(soundType, soundDataList);
+                        }
+                    }
+
+                    //------------------------------
+                    PageData pageData = new PageData(pageName, scrollEnable, maxLine, itemSlot, windowClickEnable, soundTypeListMap);
                     AkasiWeaponArsenal.getPageDataMap().put(pageName, pageData);
                 }
                 AkasiWeaponArsenal.getINSTANCE().getLogger().info("Loaded config: " + file.getName());
@@ -132,7 +172,7 @@ public class PageDataIO {
     public static void checkFolder(File folder) {
         if(!folder.exists()){
             if(folder.mkdirs()) {
-                AkasiWeaponArsenal.getINSTANCE().getLogger().info( "フォルダ" + folder.getName() + "を生成しました");
+                AkasiWeaponArsenal.getINSTANCE().getLogger().info( "フォルダ" + folder.getName() + "をk生成しました");
             }else {
                 AkasiWeaponArsenal.getINSTANCE().getLogger().warning("フォルダ" + folder.getName() + "の生成に失敗しました");
             }

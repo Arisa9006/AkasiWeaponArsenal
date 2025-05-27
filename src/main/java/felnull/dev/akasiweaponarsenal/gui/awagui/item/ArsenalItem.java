@@ -1,9 +1,13 @@
 package felnull.dev.akasiweaponarsenal.gui.awagui.item;
 
+import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
+import felnull.dev.akasiweaponarsenal.data.SoundData;
+import felnull.dev.akasiweaponarsenal.gui.awagui.page.SoundType;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import felnull.dev.akasiweaponarsenal.gui.core.GUIItem;
 import felnull.dev.akasiweaponarsenal.gui.core.InventoryGUI;
+import felnull.dev.akasiweaponarsenal.task.PlaySoundTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -12,6 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,13 +50,18 @@ public class ArsenalItem extends GUIItem {
                 if(abstractItem.falseMessage != null) {
                     e.getWhoClicked().sendMessage(abstractItem.falseMessage);
                 }
-                ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_VILLAGER_HURT, 1f,1f);
+                for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.CLICK_FALSE, Collections.emptyList())){
+                    new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
+                }
                 return;
             }
         }
         for(String command : abstractItem.commandList) {
             if(abstractItem.trueMessage != null) {
                 e.getWhoClicked().sendMessage(abstractItem.trueMessage);
+            }
+            for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.CLICK_TRUE, Collections.emptyList())){
+                new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
             }
             String parsedCommand = command.replace("%player%", e.getWhoClicked().getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
