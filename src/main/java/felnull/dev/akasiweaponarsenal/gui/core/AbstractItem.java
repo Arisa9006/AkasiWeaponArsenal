@@ -15,6 +15,10 @@ public class AbstractItem {
     @Getter
     public List<Material> lostItemList = new ArrayList<>();
     @Getter
+    public List<ItemStack> lostCSItemList = new ArrayList<>();
+    @Getter
+    public Map<ItemStack, Integer> lostCSItemNumberList = new HashMap<>();
+    @Getter
     public Map<Material, Integer> lostItemNumberList = new HashMap<>();
     @Getter
     public String falseMessage;

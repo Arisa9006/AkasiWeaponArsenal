@@ -1,6 +1,7 @@
 name: AkasiWeaponArsenal
 version: '${project.version}'
 main: felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal
+depend: ["CrackShot"]
 commands:
   awaopen:
     permission: akasiweaponarsenal.command.admin

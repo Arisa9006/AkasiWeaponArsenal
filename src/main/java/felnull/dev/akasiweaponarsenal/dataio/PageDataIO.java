@@ -1,5 +1,6 @@
 package felnull.dev.akasiweaponarsenal.dataio;
 
+import com.shampaggon.crackshot.CSUtility;
 import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.data.SoundData;
@@ -113,7 +114,22 @@ public class PageDataIO {
                                 }
                             }
                         }
+                        ConfigurationSection needCSItemSection = itemData.getConfigurationSection("NeedCSItem");
+                        Map<ItemStack, Integer> csCostMap = new HashMap<>();
+                        if (needCSItemSection != null) {
+                            for (String needCSItemName : needCSItemSection.getKeys(false)) {
+                                CSUtility csu = AkasiWeaponArsenal.getCsUtility();
+                                ItemStack csWeapon = csu.generateWeapon(needCSItemName);
+                                if(csWeapon == null){
+                                    continue;
+                                }else {
+                                    abstractItem.lostCSItemList.add(csWeapon);
+                                    csCostMap.put(csWeapon, needCSItemSection.getInt(needCSItemName + ".Cost", 1));
+                                }
+                            }
+                        }
                         abstractItem.lostItemNumberList = costMap;
+                        abstractItem.lostCSItemNumberList = csCostMap;
                         for(Integer slot : itemData.getIntegerList("Slot")) {
                             itemSlot.put(slot, abstractItem);
                         }

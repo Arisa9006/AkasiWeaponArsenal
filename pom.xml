@@ -6,7 +6,7 @@
 
   <groupId>felnull.dev</groupId>
   <artifactId>AkasiWeaponArsenal</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <packaging>jar</packaging>
 
   <name>AkasiWeaponArsenal</name>
@@ -72,6 +72,12 @@
           <groupId>org.projectlombok</groupId>
           <artifactId>lombok</artifactId>
           <version>1.18.38</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.shampaggon</groupId>
+          <artifactId>CrackShot</artifactId>
+          <version>0.98.11</version>
           <scope>provided</scope>
       </dependency>
   </dependencies>
