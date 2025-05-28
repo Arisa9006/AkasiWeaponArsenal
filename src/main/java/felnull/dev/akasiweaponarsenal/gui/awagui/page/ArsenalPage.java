@@ -4,6 +4,10 @@ import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.data.SoundData;
 import felnull.dev.akasiweaponarsenal.gui.awagui.item.ArsenalItem;
+import felnull.dev.akasiweaponarsenal.gui.awagui.item.pageButton_LeftPage;
+import felnull.dev.akasiweaponarsenal.gui.awagui.item.pageButton_RightPage;
+import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
+import felnull.dev.akasiweaponarsenal.gui.core.GUIItem;
 import felnull.dev.akasiweaponarsenal.gui.core.GUIPage;
 import felnull.dev.akasiweaponarsenal.gui.core.InventoryGUI;
 import felnull.dev.akasiweaponarsenal.task.PlaySoundTask;
@@ -39,7 +43,7 @@ public class ArsenalPage extends GUIPage {
                 continue;
             }
             if(pageData.itemSlot.containsKey(slot)) {
-                setItem(slotPosition, new ArsenalItem(gui, pageData.itemSlot.get(slot), pageData));
+                setItem(slotPosition, checkActionButton(pageData.itemSlot.get(slot)));
             }
         }
     }
@@ -102,5 +106,16 @@ public class ArsenalPage extends GUIPage {
             return;
         }
         this.subtractSlotStartPosition(9);
+    }
+
+    public GUIItem checkActionButton(AbstractItem abstractItem) {
+        switch (abstractItem.action) {
+            case LEFT_PAGE:
+                return new pageButton_LeftPage(gui, abstractItem, this);
+            case RIGHT_PAGE:
+                return new pageButton_RightPage(gui, abstractItem, this);
+            default:
+                return new ArsenalItem(gui, abstractItem, pageData);
+        }
     }
 }

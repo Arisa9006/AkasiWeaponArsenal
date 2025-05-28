@@ -1,5 +1,6 @@
 package felnull.dev.akasiweaponarsenal.gui.core;
 
+import felnull.dev.akasiweaponarsenal.gui.awagui.item.ActionType;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +26,7 @@ public class AbstractItem {
     @Getter
     public String trueMessage;
     @Getter
-    public String action;
+    public ActionType action;
 
     public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage) {
         this.itemStack = itemStack;
@@ -33,7 +34,7 @@ public class AbstractItem {
         this.trueMessage = trueMessage;
         this.falseMessage = falseMessage;
     }
-    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage, String action) {
+    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage, ActionType action) {
         this.itemStack = itemStack;
         this.commandList = commandList;
         this.trueMessage = trueMessage;

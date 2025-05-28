@@ -4,6 +4,7 @@ import com.shampaggon.crackshot.CSUtility;
 import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.data.SoundData;
+import felnull.dev.akasiweaponarsenal.gui.awagui.item.ActionType;
 import felnull.dev.akasiweaponarsenal.gui.awagui.page.SoundType;
 import felnull.dev.akasiweaponarsenal.gui.core.AbstractItem;
 import org.bukkit.Bukkit;
@@ -94,7 +95,16 @@ public class PageDataIO {
                             falseMessage = ChatColor.translateAlternateColorCodes('&', falseMessage);
                         }
                         AbstractItem abstractItem;
-                        String action = itemData.getString("Action", null);
+                        String actionStr = itemData.getString("Action", null).toUpperCase();
+                        ActionType action = null;
+                        if(actionStr != null){
+                            try {
+                                action = ActionType.valueOf(actionStr);
+                            }catch (IllegalArgumentException | NullPointerException e){
+                                e.printStackTrace();
+                            }
+                        }
+
                         if(action != null){
                             abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage, action);
                         }else {
