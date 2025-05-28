@@ -47,7 +47,6 @@ public class PageDataIO {
                     boolean scrollEnable = pageSection.getBoolean("ScrollEnable", false);
                     boolean windowClickEnable = pageSection.getBoolean("WindowClickEnable", false);
                     int maxLine = pageSection.getInt("MaxLine", 1);
-                    Sound openSound = Sound.valueOf(pageSection.getString("OpenSound", Sound.UI_BUTTON_CLICK.name()));
 
                     //-----    Item     -----
 
@@ -139,7 +138,7 @@ public class PageDataIO {
                     ConfigurationSection soundSection = pageSection.getConfigurationSection("Sound");
                     Map<SoundType, List<SoundData>> soundTypeListMap = new HashMap<>();
                     if(soundSection != null){
-                        for (String soundTypeName : itemSection.getKeys(false)) {
+                        for (String soundTypeName : soundSection.getKeys(false)) {
                             SoundType soundType;
                             try {
                                 soundType = SoundType.valueOf(soundTypeName.toUpperCase());
