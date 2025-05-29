@@ -1,5 +1,6 @@
 package felnull.dev.akasiweaponarsenal.gui.awagui.item;
 
+import com.shampaggon.crackshot.CSUtility;
 import felnull.dev.akasiweaponarsenal.AkasiWeaponArsenal;
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.data.SoundData;
@@ -43,28 +44,18 @@ public class ArsenalItem extends GUIItem {
                     checkedMaterial.add(material);
                 }
             }
-            if((abstractItem.lostItemList.size()) == check){
-                trueCheck = true;
-            }else {
-                trueCheck = false;
-                return;
-            }
+            trueCheck = (abstractItem.lostItemList.size()) == check;
         }
         Set<ItemStack> checkedItemStack = new HashSet<>();
         if(!abstractItem.lostCSItemNumberList.isEmpty()){
             int check = 0;
             for(ItemStack weapon : abstractItem.lostCSItemList){
-                if(checkItemStackTotal((Player) e.getWhoClicked(), weapon, abstractItem.lostCSItemNumberList.get(weapon))){
+                if(checkCSItemStackTotal((Player) e.getWhoClicked(), weapon, abstractItem.lostCSItemNumberList.get(weapon))){
                     check++;
                     checkedItemStack.add(weapon);
                 }
             }
-            if((abstractItem.lostCSItemList.size()) == check){
-                trueCheck = true;
-            }else {
-                trueCheck = false;
-                return;
-            }
+            trueCheck = (abstractItem.lostCSItemList.size()) == check;
         }
         if(trueCheck){
             for(ItemStack weapon : checkedItemStack){
@@ -81,16 +72,17 @@ public class ArsenalItem extends GUIItem {
                 new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
             }
         }
-
-        for(String command : abstractItem.commandList) {
-            if(abstractItem.trueMessage != null) {
+        if(trueCheck) {
+            if (abstractItem.trueMessage != null) {
                 e.getWhoClicked().sendMessage(abstractItem.trueMessage);
             }
-            for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.CLICK_TRUE, Collections.emptyList())){
+            for (SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.CLICK_TRUE, Collections.emptyList())) {
                 new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
             }
-            String parsedCommand = command.replace("%player%", e.getWhoClicked().getName());
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+            for (String command : abstractItem.commandList) {
+                String parsedCommand = command.replace("%player%", e.getWhoClicked().getName());
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+            }
         }
     }
 
@@ -108,12 +100,16 @@ public class ArsenalItem extends GUIItem {
         }
         return false;
     }
-    public boolean checkItemStackTotal(Player player, ItemStack itemStack, int need) {
+    public boolean checkCSItemStackTotal(Player player, ItemStack itemStack, int need) {
         int total = 0;
 
         for (ItemStack item : player.getInventory().getContents()) {
             if (item == null) continue;
-            if(item.isSimilar(itemStack)) {
+            CSUtility csu = AkasiWeaponArsenal.getCsUtility();
+            String itemInventoryWeaponName = csu.getWeaponTitle(item);
+            String itemStackWeaponName = csu.getWeaponTitle(itemStack);
+            if(itemInventoryWeaponName == null || itemStackWeaponName == null) continue;
+            if(itemInventoryWeaponName.equals(itemStackWeaponName)) {
                 total += item.getAmount();
                 if (total >= need) {
                     return true;

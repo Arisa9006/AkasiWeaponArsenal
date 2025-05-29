@@ -68,28 +68,43 @@ public class ArsenalPage extends GUIPage {
 
     public void changeSlotStartPosition(int startPosition) {
         this.invStartPosition = startPosition;
-        if (this.invStartPosition > (pageData.maxLine - (pageData.maxLine % 6)) * 9){
-            this.invStartPosition = 225;
+
+        int displayableLines = super.getInventory().getSize() / 9;
+        int maxStartLine = pageData.maxLine - displayableLines;
+        int maxStartPosition = maxStartLine * 9;
+
+        if (this.invStartPosition > maxStartPosition){
+            this.invStartPosition = maxStartPosition;
         } else if (this.invStartPosition < 0) {
             this.invStartPosition = 0;
         }
         this.setUp();
     }
 
-    public void addSlotStartPosition(int plusPosition) {
+    public boolean addSlotStartPosition(int plusPosition) {
         this.invStartPosition += plusPosition;
-        if (this.invStartPosition > ((pageData.maxLine - (pageData.maxLine / 2)) - 3) * 9){
-            this.invStartPosition = ((pageData.maxLine - (pageData.maxLine / 2)) - 3) * 9;
+        boolean success = true;
+        int displayableLines = super.getInventory().getSize() / 9;
+        int maxStartLine = pageData.maxLine - displayableLines;
+        int maxStartPosition = maxStartLine * 9;
+
+        if (this.invStartPosition > maxStartPosition){
+            this.invStartPosition = maxStartPosition;
+            success = false;
         }
         this.setUp();
+        return success;
     }
 
-    public void subtractSlotStartPosition(int minusPosition) {
+    public boolean subtractSlotStartPosition(int minusPosition) {
         this.invStartPosition -= minusPosition;
+        boolean success = true;
         if (this.invStartPosition < 0){
             this.invStartPosition = 0;
+            success = false;
         }
         this.setUp();
+        return success;
     }
 
     @Override
@@ -109,6 +124,9 @@ public class ArsenalPage extends GUIPage {
     }
 
     public GUIItem checkActionButton(AbstractItem abstractItem) {
+        if(abstractItem.action == null){
+            return new ArsenalItem(gui, abstractItem, pageData);
+        }
         switch (abstractItem.action) {
             case LEFT_PAGE:
                 return new pageButton_LeftPage(gui, abstractItem, this);

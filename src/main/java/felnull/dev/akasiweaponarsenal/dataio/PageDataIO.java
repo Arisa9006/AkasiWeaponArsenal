@@ -95,11 +95,11 @@ public class PageDataIO {
                             falseMessage = ChatColor.translateAlternateColorCodes('&', falseMessage);
                         }
                         AbstractItem abstractItem;
-                        String actionStr = itemData.getString("Action", null).toUpperCase();
+                        String actionStr = itemData.getString("Action", null);
                         ActionType action = null;
                         if(actionStr != null){
                             try {
-                                action = ActionType.valueOf(actionStr);
+                                action = ActionType.valueOf(actionStr.toUpperCase());
                             }catch (IllegalArgumentException | NullPointerException e){
                                 e.printStackTrace();
                             }
@@ -162,7 +162,7 @@ public class PageDataIO {
                             }
                             List<SoundData> soundDataList = new ArrayList<>();
 
-                            ConfigurationSection soundDataSection = pageSection.getConfigurationSection(soundTypeName);
+                            ConfigurationSection soundDataSection = soundSection.getConfigurationSection(soundTypeName);
                             if(soundDataSection == null){
                                 Bukkit.getLogger().warning("SoundDataを記述してください");
                                 continue;
@@ -172,12 +172,19 @@ public class PageDataIO {
                                 try {
                                     sound = Sound.valueOf(soundName);
                                 }catch (IllegalArgumentException | NullPointerException e) {
-                                    Bukkit.getLogger().warning("無効なサウンドName: " + soundTypeName.toUpperCase());
+                                    Bukkit.getLogger().warning("無効なサウンドName: " + soundName.toUpperCase());
                                     continue;
                                 }
-                                float volume = (float) soundDataSection.getDouble("Volume");
-                                float pitch = (float) soundDataSection.getDouble("Pitch");
-                                int delay = soundDataSection.getInt("Delay");
+
+                                ConfigurationSection soundValueSection = soundDataSection.getConfigurationSection(soundName);
+                                if (soundValueSection == null) {
+                                    Bukkit.getLogger().warning(soundName + "サウンドの音量などが設定されていません!");
+                                    continue;
+                                }
+
+                                float volume = (float) soundValueSection.getDouble("Volume");
+                                float pitch = (float) soundValueSection.getDouble("Pitch");
+                                int delay = soundValueSection.getInt("Delay");
 
                                 soundDataList.add(new SoundData(sound, volume, pitch, delay));
                             }

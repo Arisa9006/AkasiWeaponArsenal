@@ -2,6 +2,7 @@ package felnull.dev.akasiweaponarsenal.task;
 
 import felnull.dev.akasiweaponarsenal.data.PageData;
 import felnull.dev.akasiweaponarsenal.gui.core.InventoryGUI;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,6 +23,7 @@ public class PlaySoundTask extends BukkitRunnable {
     @Override
     public void run() {
         if(player != null){
+            Bukkit.getLogger().info("タスク動作");
             player.playSound(player.getLocation(), sound, pitch, volume);
         }
     }
