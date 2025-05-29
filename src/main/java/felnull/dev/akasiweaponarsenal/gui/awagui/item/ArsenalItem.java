@@ -47,7 +47,7 @@ public class ArsenalItem extends GUIItem {
             trueCheck = (abstractItem.lostItemList.size()) == check;
         }
         Set<ItemStack> checkedItemStack = new HashSet<>();
-        if(!abstractItem.lostCSItemNumberList.isEmpty()){
+        if(!abstractItem.lostCSItemNumberList.isEmpty() && trueCheck){
             int check = 0;
             for(ItemStack weapon : abstractItem.lostCSItemList){
                 if(checkCSItemStackTotal((Player) e.getWhoClicked(), weapon, abstractItem.lostCSItemNumberList.get(weapon))){
@@ -59,7 +59,7 @@ public class ArsenalItem extends GUIItem {
         }
         if(trueCheck){
             for(ItemStack weapon : checkedItemStack){
-                removeItemStacks((Player) e.getWhoClicked(), weapon, abstractItem.lostCSItemNumberList.get(weapon));
+                removeCSItemStacks((Player) e.getWhoClicked(), weapon, abstractItem.lostCSItemNumberList.get(weapon));
             }
             for(Material material : checkedMaterial){
                 removeItems((Player) e.getWhoClicked(), material, abstractItem.lostItemNumberList.get(material));
@@ -150,13 +150,19 @@ public class ArsenalItem extends GUIItem {
         player.updateInventory();
     }
 
-    public void removeItemStacks(Player player, ItemStack itemStack, int amountToRemove) {
+    public void removeCSItemStacks(Player player, ItemStack itemStack, int amountToRemove) {
         Inventory inventory = player.getInventory();
         ItemStack[] contents = inventory.getContents();
+        CSUtility csu = AkasiWeaponArsenal.getCsUtility();
+
+        String itemStackWeaponName = csu.getWeaponTitle(itemStack);
+
 
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
-            if (item == null || !item.isSimilar(itemStack)) continue;
+            String itemInventoryWeaponName = csu.getWeaponTitle(item);
+            if(itemInventoryWeaponName == null || itemStackWeaponName == null) continue;
+            if (item == null || !itemInventoryWeaponName.equals(itemStackWeaponName)) continue;
 
             int stackAmount = item.getAmount();
 
