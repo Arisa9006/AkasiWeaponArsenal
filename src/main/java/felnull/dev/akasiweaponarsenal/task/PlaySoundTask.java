@@ -23,7 +23,7 @@ public class PlaySoundTask extends BukkitRunnable {
     @Override
     public void run() {
         if(player != null){
-            player.playSound(player.getLocation(), sound, pitch, volume);
+            player.playSound(player.getLocation(), sound, volume, pitch);
         }
     }
 }
