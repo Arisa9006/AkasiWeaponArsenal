@@ -57,6 +57,9 @@ public class ArsenalItem extends GUIItem {
             }
             trueCheck = (abstractItem.lostCSItemList.size()) == check;
         }
+        if(abstractItem.lostItemList.isEmpty() && abstractItem.lostCSItemList.isEmpty()){
+            trueCheck = true;
+        }
         if(trueCheck){
             for(ItemStack weapon : checkedItemStack){
                 removeCSItemStacks((Player) e.getWhoClicked(), weapon, abstractItem.lostCSItemNumberList.get(weapon));
@@ -64,15 +67,6 @@ public class ArsenalItem extends GUIItem {
             for(Material material : checkedMaterial){
                 removeItems((Player) e.getWhoClicked(), material, abstractItem.lostItemNumberList.get(material));
             }
-        }else {
-            if(abstractItem.falseMessage != null) {
-                e.getWhoClicked().sendMessage(abstractItem.falseMessage);
-            }
-            for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.CLICK_FALSE, Collections.emptyList())){
-                new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
-            }
-        }
-        if(trueCheck) {
             if (abstractItem.trueMessage != null) {
                 e.getWhoClicked().sendMessage(abstractItem.trueMessage);
             }
@@ -82,6 +76,13 @@ public class ArsenalItem extends GUIItem {
             for (String command : abstractItem.commandList) {
                 String parsedCommand = command.replace("%player%", e.getWhoClicked().getName());
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+            }
+        }else {
+            if(abstractItem.falseMessage != null) {
+                e.getWhoClicked().sendMessage(abstractItem.falseMessage);
+            }
+            for(SoundData soundData : pageData.soundDataMap.getOrDefault(SoundType.CLICK_FALSE, Collections.emptyList())){
+                new PlaySoundTask(gui.player, soundData.getSound(), soundData.getVolume(), soundData.getPitch()).runTaskLater(AkasiWeaponArsenal.getINSTANCE(), soundData.delay);
             }
         }
     }
