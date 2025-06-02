@@ -30,174 +30,18 @@ public class PageDataIO {
 
     public static void load() {
         checkFolder(dataFolder);
-        //ArsenalPage内のyaml全読み込み
         File[] files = dataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+        if (files == null) return;
 
-        //配列内のyamlを１つ１つ読み込み
-        if (files != null) {
-            for (File file : files) {
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-
-                for(String pageName : config.getKeys(false)){
-                    //-----    Page     -----
-
-                    Map<Integer, AbstractItem> itemSlot = new HashMap<>();
-                    ConfigurationSection pageSection = config.getConfigurationSection(pageName);
-                    if (pageSection == null) continue;
-
-                    boolean scrollEnable = pageSection.getBoolean("ScrollEnable", false);
-                    boolean windowClickEnable = pageSection.getBoolean("WindowClickEnable", false);
-                    int maxLine = pageSection.getInt("MaxLine", 1);
-
-                    //-----    Item     -----
-
-                    ConfigurationSection itemSection = pageSection.getConfigurationSection("Item");
-                    if (itemSection == null) continue;
-
-                    for (String itemName : itemSection.getKeys(false)) {
-                        ConfigurationSection itemData = itemSection.getConfigurationSection(itemName);
-                        if (itemData == null) continue;
-
-                        Material material = Material.getMaterial(itemData.getString("Material", Material.DIRT.name()));
-                        List<String> loreList = itemData.getStringList("Lore");
-                        List<String> coloredLoreList = loreList.stream()
-                                .map(line -> ChatColor.translateAlternateColorCodes('&', line))
-                                .collect(Collectors.toList());
-                        ItemStack item = new ItemStack(material);
-
-                        ItemMeta meta = item.getItemMeta();
-                        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemData.getString("Name", itemName)));
-                        meta.setLore(coloredLoreList);
-                        meta.spigot().setUnbreakable(true);
-                        if(itemData.getBoolean("HideNBT", true)){
-                            meta.addItemFlags(
-                                    ItemFlag.HIDE_ATTRIBUTES,     // 攻撃力などを隠す
-                                    ItemFlag.HIDE_UNBREAKABLE,    // Unbreakable を隠す
-                                    ItemFlag.HIDE_ENCHANTS,       // エンチャントを隠す（必要なら）
-                                    ItemFlag.HIDE_DESTROYS,       // "Can Destroy" を隠す
-                                    ItemFlag.HIDE_PLACED_ON,      // "Can Place On" を隠す
-                                    ItemFlag.HIDE_POTION_EFFECTS  // ポーション効果を隠す
-                            );
-                        }
-                        item.setItemMeta(meta);
-
-                        if(itemData.isInt("Damage")){
-                            short damage = (short) itemData.getInt("Damage");
-                            item.setDurability((short) (damage));
-                        }
-                        List<String> commandList = itemData.getStringList("Commands");
-                        String trueMessage =  itemData.getString("TrueMessage", null);
-                        if(trueMessage != null){
-                            trueMessage = ChatColor.translateAlternateColorCodes('&', trueMessage);
-                        }
-                        String falseMessage = itemData.getString("FalseMessage", null);
-                        if(falseMessage != null){
-                            falseMessage = ChatColor.translateAlternateColorCodes('&', falseMessage);
-                        }
-                        AbstractItem abstractItem;
-                        String actionStr = itemData.getString("Action", null);
-                        ActionType action = null;
-                        if(actionStr != null){
-                            try {
-                                action = ActionType.valueOf(actionStr.toUpperCase());
-                            }catch (IllegalArgumentException | NullPointerException e){
-                                e.printStackTrace();
-                            }
-                        }
-
-                        if(action != null){
-                            abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage, action);
-                        }else {
-                            abstractItem = new AbstractItem(item, commandList, trueMessage, falseMessage);
-                        }
-
-                        ConfigurationSection needItemSection = itemData.getConfigurationSection("NeedItem");
-                        Map<Material, Integer> costMap = new HashMap<>();
-                        if (needItemSection != null) {
-                            for (String needItemName : needItemSection.getKeys(false)) {
-                                String matName = needItemName.toUpperCase();
-                                Material mat = Material.getMaterial(matName);
-                                if (mat != null) {
-                                    abstractItem.lostItemList.add(mat);
-                                    costMap.put(mat, needItemSection.getInt(needItemName + ".Cost", 1));
-                                }
-                            }
-                        }
-                        ConfigurationSection needCSItemSection = itemData.getConfigurationSection("NeedCSItem");
-                        Map<ItemStack, Integer> csCostMap = new HashMap<>();
-                        if (needCSItemSection != null) {
-                            for (String needCSItemName : needCSItemSection.getKeys(false)) {
-                                CSUtility csu = AkasiWeaponArsenal.getCsUtility();
-                                ItemStack csWeapon = csu.generateWeapon(needCSItemName);
-                                if(csWeapon == null){
-                                    continue;
-                                }else {
-                                    abstractItem.lostCSItemList.add(csWeapon);
-                                    csCostMap.put(csWeapon, needCSItemSection.getInt(needCSItemName + ".Cost", 1));
-                                }
-                            }
-                        }
-                        abstractItem.lostItemNumberList = costMap;
-                        abstractItem.lostCSItemNumberList = csCostMap;
-                        for(Integer slot : itemData.getIntegerList("Slot")) {
-                            itemSlot.put(slot, abstractItem);
-                        }
-                    }
-                    //----------- SOUND ------------
-
-                    ConfigurationSection soundSection = pageSection.getConfigurationSection("Sound");
-                    Map<SoundType, List<SoundData>> soundTypeListMap = new HashMap<>();
-                    if(soundSection != null){
-                        for (String soundTypeName : soundSection.getKeys(false)) {
-                            SoundType soundType;
-                            try {
-                                soundType = SoundType.valueOf(soundTypeName.toUpperCase());
-                            }catch (IllegalArgumentException | NullPointerException e){
-                                Bukkit.getLogger().warning("無効なサウンドType: " + soundTypeName.toUpperCase());
-                                Bukkit.getLogger().info("利用可能なSoundType");
-                                for(SoundType enableSoundType : SoundType.values()){
-                                    Bukkit.getLogger().info(enableSoundType.name());
-                                }
-                                continue;
-                            }
-                            List<SoundData> soundDataList = new ArrayList<>();
-
-                            ConfigurationSection soundDataSection = soundSection.getConfigurationSection(soundTypeName);
-                            if(soundDataSection == null){
-                                Bukkit.getLogger().warning("SoundDataを記述してください");
-                                continue;
-                            }
-                            for(String soundName : soundDataSection.getKeys(false)){
-                                Sound sound;
-                                try {
-                                    sound = Sound.valueOf(soundName);
-                                }catch (IllegalArgumentException | NullPointerException e) {
-                                    Bukkit.getLogger().warning("無効なサウンドName: " + soundName.toUpperCase());
-                                    continue;
-                                }
-
-                                ConfigurationSection soundValueSection = soundDataSection.getConfigurationSection(soundName);
-                                if (soundValueSection == null) {
-                                    Bukkit.getLogger().warning(soundName + "サウンドの音量などが設定されていません!");
-                                    continue;
-                                }
-
-                                float volume = (float) soundValueSection.getDouble("Volume");
-                                float pitch = (float) soundValueSection.getDouble("Pitch");
-                                int delay = soundValueSection.getInt("Delay");
-
-                                soundDataList.add(new SoundData(sound, volume, pitch, delay));
-                            }
-                            soundTypeListMap.put(soundType, soundDataList);
-                        }
-                    }
-
-                    //------------------------------
-                    PageData pageData = new PageData(pageName, scrollEnable, maxLine, itemSlot, windowClickEnable, soundTypeListMap);
+        for (File file : files) {
+            YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+            for (String pageName : config.getKeys(false)) {
+                PageData pageData = loadPageData(pageName, config.getConfigurationSection(pageName));
+                if (pageData != null) {
                     AkasiWeaponArsenal.getPageDataMap().put(pageName, pageData);
                 }
-                AkasiWeaponArsenal.getINSTANCE().getLogger().info("Loaded config: " + file.getName());
             }
+            AkasiWeaponArsenal.getINSTANCE().getLogger().info("Loaded config: " + file.getName());
         }
     }
 
@@ -210,4 +54,209 @@ public class PageDataIO {
             }
         }
     }
+
+    private static PageData loadPageData(String pageName, ConfigurationSection pageSection) {
+        if (pageSection == null) return null;
+
+        boolean scrollEnable = pageSection.getBoolean("ScrollEnable", false);
+        boolean windowClickEnable = pageSection.getBoolean("WindowClickEnable", false);
+        int maxLine = pageSection.getInt("MaxLine", 1);
+
+        Map<Integer, AbstractItem> itemSlot = loadItems(pageSection.getConfigurationSection("Item"));
+        Map<SoundType, List<SoundData>> soundTypeListMap = loadSounds(pageSection.getConfigurationSection("Sound"));
+
+        return new PageData(pageName, scrollEnable, maxLine, itemSlot, windowClickEnable, soundTypeListMap);
+    }
+
+    private static Map<Integer, AbstractItem> loadItems(ConfigurationSection itemSection) {
+        Map<Integer, AbstractItem> itemSlot = new HashMap<>();
+        if (itemSection == null) return itemSlot;
+
+        for (String itemName : itemSection.getKeys(false)) {
+            ConfigurationSection itemData = itemSection.getConfigurationSection(itemName);
+            if (itemData == null) continue;
+
+            AbstractItem abstractItem = createAbstractItem(itemData, itemName);
+            if (abstractItem == null) continue;
+
+            for (Integer slot : itemData.getIntegerList("Slot")) {
+                itemSlot.put(slot, abstractItem);
+            }
+        }
+        return itemSlot;
+    }
+    // ----------------Itemデータ処理---------------------
+    private static AbstractItem createAbstractItem(ConfigurationSection itemData, String fallbackName) {
+        Material material = Material.getMaterial(itemData.getString("Material", Material.DIRT.name()));
+        if (material == null) material = Material.DIRT;
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemData.getString("Name", fallbackName)));
+        List<String> lore = itemData.getStringList("Lore").stream()
+                .map(line -> ChatColor.translateAlternateColorCodes('&', line))
+                .collect(Collectors.toList());
+        meta.setLore(lore);
+        meta.spigot().setUnbreakable(true);
+
+        if (itemData.getBoolean("HideNBT", true)) {
+            meta.addItemFlags(
+                    ItemFlag.HIDE_ATTRIBUTES,     // 攻撃力などを隠す
+                    ItemFlag.HIDE_UNBREAKABLE,    // Unbreakable を隠す
+                    ItemFlag.HIDE_ENCHANTS,       // エンチャントを隠す（必要なら）
+                    ItemFlag.HIDE_DESTROYS,       // "Can Destroy" を隠す
+                    ItemFlag.HIDE_PLACED_ON,      // "Can Place On" を隠す
+                    ItemFlag.HIDE_POTION_EFFECTS  // ポーション効果を隠す
+            );
+        }
+        item.setItemMeta(meta);
+
+        if (itemData.isInt("Damage")) {
+            item.setDurability((short) itemData.getInt("Damage"));
+        }
+
+        ActionType action = null;
+        String actionStr = itemData.getString("Action", null);
+        if (actionStr != null) {
+            try {
+                action = ActionType.valueOf(actionStr.toUpperCase());
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        List<String> commands = itemData.getStringList("Commands");
+        String trueMessage = translateNullableString(itemData.getString("TrueMessage"));
+        String falseMessage = translateNullableString(itemData.getString("FalseMessage"));
+        boolean silentMode = itemData.getBoolean("SilentMode", false);
+
+
+        AbstractItem abstractItem = (action != null)
+                ? new AbstractItem(item, commands, trueMessage, falseMessage, silentMode, action)
+                : new AbstractItem(item, commands, trueMessage, falseMessage, silentMode);
+
+        loadNeedItems(itemData.getConfigurationSection("NeedItem"), abstractItem);
+        loadNeedCSItems(itemData.getConfigurationSection("NeedCSItem"), abstractItem);
+        loadItemSounds(itemData.getConfigurationSection("ItemSound"), abstractItem);
+
+        return abstractItem;
+    }
+
+    private static void loadNeedItems(ConfigurationSection needItemSection, AbstractItem abstractItem) {
+        if (needItemSection == null) return;
+        Map<Material, Integer> costMap = new HashMap<>();
+
+        for (String needItemName : needItemSection.getKeys(false)) {
+            Material mat = Material.getMaterial(needItemName.toUpperCase());
+            if (mat != null) {
+                abstractItem.lostItemList.add(mat);
+                costMap.put(mat, needItemSection.getInt(needItemName + ".Cost", 1));
+            }
+        }
+        abstractItem.lostItemNumberList = costMap;
+    }
+
+    private static void loadNeedCSItems(ConfigurationSection needCSItemSection, AbstractItem abstractItem) {
+        if (needCSItemSection == null) return;
+        Map<ItemStack, Integer> csCostMap = new HashMap<>();
+        CSUtility csu = AkasiWeaponArsenal.getCsUtility();
+
+        for (String needCSItemName : needCSItemSection.getKeys(false)) {
+            ItemStack csWeapon = csu.generateWeapon(needCSItemName);
+            if (csWeapon != null) {
+                abstractItem.lostCSItemList.add(csWeapon);
+                csCostMap.put(csWeapon, needCSItemSection.getInt(needCSItemName + ".Cost", 1));
+            }
+        }
+        abstractItem.lostCSItemNumberList = csCostMap;
+    }
+
+    private static void loadItemSounds(ConfigurationSection soundSection, AbstractItem abstractItem) {
+        if (soundSection == null) return;
+
+        for (String key : soundSection.getKeys(false)) {
+            SoundType type;
+            try {
+                type = SoundType.valueOf(key.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                Bukkit.getLogger().warning("不明なSoundType: " + key);
+                continue;
+            }
+
+            // CLICK系以外は無視する
+            if (type != SoundType.CLICK_TRUE && type != SoundType.CLICK_FALSE) continue;
+
+            List<SoundData> dataList = new ArrayList<>();
+            List<Map<?, ?>> soundList = soundSection.getMapList(key); // リスト形式
+
+            for (Map<?, ?> mapList : soundList) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> map = (Map<String, Object>) mapList;
+                    Sound sound = Sound.valueOf((String) map.get("Sound"));
+                    float volume = ((Number) map.getOrDefault("Volume", 1.0)).floatValue();
+                    float pitch = ((Number) map.getOrDefault("Pitch", 1.0)).floatValue();
+                    int delay = ((Number) map.getOrDefault("Delay", 0)).intValue();
+                    dataList.add(new SoundData(sound, volume, pitch, delay));
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("ItemSoundの読み込み失敗: " + e.getMessage());
+                }
+            }
+            abstractItem.itemSoundMap.put(type, dataList);
+        }
+    }
+
+    private static String translateNullableString(String str) {
+        if (str == null) return null;
+        return ChatColor.translateAlternateColorCodes('&', str);
+    }
+    // -----------------------------------------------------
+
+    //-----------------------Sound--------------------------
+
+    private static Map<SoundType, List<SoundData>> loadSounds(ConfigurationSection soundSection) {
+        Map<SoundType, List<SoundData>> soundMap = new HashMap<>();
+        if (soundSection == null) return soundMap;
+
+        for (String soundTypeKey : soundSection.getKeys(false)) {
+            SoundType soundType;
+            try {
+                soundType = SoundType.valueOf(soundTypeKey.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+            // Itemで読み込んでいる２種類の場合はスキップ
+            //Set<SoundType> skipTypes = EnumSet.of(SoundType.CLICK_TRUE, SoundType.CLICK_FALSE);
+            //if (skipTypes.contains(soundType)) continue;
+
+            List<SoundData> soundDataList = new ArrayList<>();
+            ConfigurationSection typeSection = soundSection.getConfigurationSection(soundTypeKey);
+            if (typeSection == null) continue;
+
+            for (String soundName : typeSection.getKeys(false)) {
+                ConfigurationSection soundDataSection = typeSection.getConfigurationSection(soundName);
+                if (soundDataSection == null) continue;
+
+                Sound sound;
+                try {
+                    sound = Sound.valueOf(soundDataSection.getString("Sound"));
+                } catch (IllegalArgumentException | NullPointerException e) {
+                    // 無効なSound名ならログを出して処理スキップなど
+                    Bukkit.getLogger().warning("無効なサウンド名: " + soundDataSection.getString("Sound"));
+                    continue;
+                }
+
+                SoundData soundData = new SoundData(
+                        sound,
+                        (float) soundDataSection.getDouble("Volume", 1.0),
+                        (float) soundDataSection.getDouble("Pitch", 1.0),
+                        soundDataSection.getInt("Delay", 0)
+                );
+                soundDataList.add(soundData);
+            }
+            soundMap.put(soundType, soundDataList);
+        }
+        return soundMap;
+    }
+    // -----------------------------------------------------
 }

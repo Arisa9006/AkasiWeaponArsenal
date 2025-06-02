@@ -1,6 +1,8 @@
 package felnull.dev.akasiweaponarsenal.gui.core;
 
+import felnull.dev.akasiweaponarsenal.data.SoundData;
 import felnull.dev.akasiweaponarsenal.gui.awagui.item.ActionType;
+import felnull.dev.akasiweaponarsenal.gui.awagui.page.SoundType;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -27,18 +29,23 @@ public class AbstractItem {
     public String trueMessage;
     @Getter
     public ActionType action;
+    @Getter
+    public boolean silentMode;
+    public Map<SoundType, List<SoundData>> itemSoundMap = new HashMap<>();
 
-    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage) {
+    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage, boolean silentMode) {
         this.itemStack = itemStack;
         this.commandList = commandList;
         this.trueMessage = trueMessage;
         this.falseMessage = falseMessage;
+        this.silentMode = silentMode;
     }
-    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage, ActionType action) {
+    public AbstractItem(ItemStack itemStack, List<String> commandList, String trueMessage , String falseMessage, boolean silentMode, ActionType action) {
         this.itemStack = itemStack;
         this.commandList = commandList;
         this.trueMessage = trueMessage;
         this.falseMessage = falseMessage;
+        this.silentMode = silentMode;
         this.action = action;
     }
 }
