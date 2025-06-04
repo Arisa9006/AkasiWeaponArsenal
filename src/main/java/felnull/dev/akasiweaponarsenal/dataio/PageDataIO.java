@@ -215,48 +215,43 @@ public class PageDataIO {
     //-----------------------Sound--------------------------
 
     private static Map<SoundType, List<SoundData>> loadSounds(ConfigurationSection soundSection) {
-        Map<SoundType, List<SoundData>> soundMap = new HashMap<>();
-        if (soundSection == null) return soundMap;
-
-        for (String soundTypeKey : soundSection.getKeys(false)) {
-            SoundType soundType;
-            try {
-                soundType = SoundType.valueOf(soundTypeKey.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                continue;
-            }
-            // Itemで読み込んでいる２種類の場合はスキップ
-            //Set<SoundType> skipTypes = EnumSet.of(SoundType.CLICK_TRUE, SoundType.CLICK_FALSE);
-            //if (skipTypes.contains(soundType)) continue;
-
-            List<SoundData> soundDataList = new ArrayList<>();
-            ConfigurationSection typeSection = soundSection.getConfigurationSection(soundTypeKey);
-            if (typeSection == null) continue;
-
-            for (String soundName : typeSection.getKeys(false)) {
-                ConfigurationSection soundDataSection = typeSection.getConfigurationSection(soundName);
-                if (soundDataSection == null) continue;
-
-                Sound sound;
+        Map<SoundType, List<SoundData>> soundTypeListMap = new HashMap<>();
+        if(soundSection != null){
+            for (String soundTypeName : soundSection.getKeys(false)) {
+                SoundType soundType;
                 try {
-                    sound = Sound.valueOf(soundDataSection.getString("Sound"));
-                } catch (IllegalArgumentException | NullPointerException e) {
-                    // 無効なSound名ならログを出して処理スキップなど
-                    Bukkit.getLogger().warning("無効なサウンド名: " + soundDataSection.getString("Sound"));
+                    soundType = SoundType.valueOf(soundTypeName.toUpperCase());
+                }catch (IllegalArgumentException | NullPointerException e){
+                    Bukkit.getLogger().warning("無効なサウンドType: " + soundTypeName.toUpperCase());
+                    Bukkit.getLogger().info("利用可能なSoundType");
+                    for(SoundType enableSoundType : SoundType.values()){
+                        Bukkit.getLogger().info(enableSoundType.name());
+                    }
                     continue;
                 }
+                List<SoundData> soundDataList = new ArrayList<>();
 
-                SoundData soundData = new SoundData(
-                        sound,
-                        (float) soundDataSection.getDouble("Volume", 1.0),
-                        (float) soundDataSection.getDouble("Pitch", 1.0),
-                        soundDataSection.getInt("Delay", 0)
-                );
-                soundDataList.add(soundData);
+                List<Map<?, ?>> soundList = soundSection.getMapList(soundTypeName);
+                for (Map<?, ?> soundEntry : soundList) {
+                    String soundName = String.valueOf(soundEntry.get("Sound"));
+                    Sound sound;
+                    try {
+                        sound = Sound.valueOf(soundName);
+                    } catch (IllegalArgumentException | NullPointerException e) {
+                        Bukkit.getLogger().warning("無効なサウンドName: " + soundName);
+                        continue;
+                    }
+
+                    float volume = ((Number) soundEntry.get("Volume")).floatValue();
+                    float pitch = ((Number) soundEntry.get("Pitch")).floatValue();
+                    int delay = ((Number) soundEntry.get("Delay")).intValue();
+
+                    soundDataList.add(new SoundData(sound, volume, pitch, delay));
+                }
+                soundTypeListMap.put(soundType, soundDataList);
             }
-            soundMap.put(soundType, soundDataList);
         }
-        return soundMap;
+        return soundTypeListMap;
     }
     // -----------------------------------------------------
 }
